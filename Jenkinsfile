@@ -9,7 +9,7 @@ pipeline {
         stage("build jar") {
             steps {
                 script {
-                    echo 'building the application...'
+                    echo "building the application..."
                     sh 'mvn package'
                 }
             }
@@ -31,7 +31,7 @@ pipeline {
 
         stage("deploy") {
             steps {
-                echo "deploying the application version ${params.VERSION}..."
+                echo "deploying the application..."
             }
         }
     }
