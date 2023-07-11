@@ -2,27 +2,38 @@ pipeline {
     agent any
     tools {
         maven 'maven-3.9.3'
-        jdk 'java.17'
     }
-    stages {
-        stage ('Initialize') {
-            steps {
-                sh '''
-                    echo "PATH = ${PATH}"
-                    echo "M2_HOME = ${M2_HOME}"
-                '''
-            }
-        }
 
-        stage ('Build') {
+    stages {
+   
+        stage("build jar") {
             steps {
-                sh 'mvn -Dmaven.test.failure.ignore=true install' 
-            }
-            post {
-                success {
-                    junit 'target/surefire-reports/**/*.xml' 
+                script {
+                    echo "building the application..."
+                    sh 'mvn package'
                 }
             }
         }
+
+        stage("build image") {
+            steps {
+                script {
+                    echo 'building the docker image...'
+                    withCredentials ([usernamePassword(credentialsId:'6ec9d130-1d94-42af-9cf5-26ab651d58da', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                        sh 'docker build . -t kryssperer/nanasapp:1.5'
+                        sh "echo $PASS | docker login -u $USER --password-stdin"
+                        sh 'docker push kryssperer/nanasapp:1.5'
+                    }
+
+                }
+            }
+        }
+
+        stage("deploy") {
+            steps {
+                echo "deploying the application ..."
+            }
+        }
     }
+
 }
